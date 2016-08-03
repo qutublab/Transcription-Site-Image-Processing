@@ -2,7 +2,7 @@ function cluster1(fileName)
 
 % radiusNormalization - 1: radius divided by distance of centroid to 
 % boundary; 2: radius divided by nucleus major axis length
-radiusNormalization = 2;
+radiusNormalization = 1;
 
 % Replicates parameter for kmeans function
 kmeansReplicates = 1000;

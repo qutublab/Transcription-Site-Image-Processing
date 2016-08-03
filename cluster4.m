@@ -2,7 +2,7 @@ function cluster4(fileName)
 
 % radiusNormalization - 1: radius divided by distance of centroid to 
 % boundary; 2: radius divided by nucleus major axis length
-radiusNormalization = 2;
+radiusNormalization = 1;
 
 % Replicates parameter for kmeans function
 kmeansReplicates = 1000;
@@ -10,9 +10,6 @@ kmeansReplicates = 1000;
 if nargin == 0
     fileName = 'out.csv';
 end
-
-% Replicates parameter for kmeans function
-kmeansReplicates = 1000;
 
 [data varnames casenames] = tblread(fileName, ',');
 varnamesCA = cell(size(varnames, 1), 1);
@@ -153,6 +150,7 @@ for k = 2:maxK
 end
 fprintf('Best k between %d and %d: %d (mean silhouette: %f)\n', 2, maxK, bestK, bestS);
 
+
 clusterSize = zeros(bestK, 1);
 for i = 1:bestK
    clusterSize(i) =  sum(double(bestIdx == i));
@@ -191,4 +189,44 @@ else
     ylim([-extremeY, extremeY]);
 end
 axis equal
+
+
+
+% Plot cluster data as 4 concentric rings where borders represent the distance
+% of the 4 farthest points in each quartile
+
+numRings = 4;
+cmap = jet(numRings);
+h = figure;
+for i = 1:bestK
+    inCluster = bestIdx == i;
+    clusterXY = points3(inCluster, :);
+    clusterSize = size(clusterXY, 1);
+    centroidX = bestCentroids(i, 1);
+    centroidY = bestCentroids(i, 2);
+    % Calculate distance of each point in cluster from cluster center
+    distanceFromClusterCenter = sqrt((clusterXY(:, 1) - centroidX).^2 + (clusterXY(:, 2) - centroidY).^2);
+    distanceFromClusterCenter = sort(distanceFromClusterCenter);
+    for r = numRings:-1:1
+        d = distanceFromClusterCenter(round(clusterSize * (r / numRings)));
+        drawDisk(centroidX, centroidY, d, cmap(r, :));
+    end
+end
+title({'Cartesian Coordinates of Intron Locations with 180 Degree Replicates'; normalizationStr; 'Clustered According to Cartesian Coordinates'; '3 Transcription Sites per Nucleus'; 'Colored regions within each cluster contain equal numbers of points'});
+xlabel('Normalized X');
+ylabel('Normalized Y');
+if radiusNormalization == 1
+    xlim([-1, 1]);
+    ylim([-1, 1]);
+else
+    extremeX = roundN(max(abs(X(:))), 1);
+    xlim([-extremeX, extremeX]);
+    extremeY = roundN(max(abs(Y(:))), 1);
+    ylim([-extremeY, extremeY]);
+end
+axis equal
+
+
+
+
 end
