@@ -6,7 +6,7 @@ function cluster3(fileName)
 radiusNormalization = 1;
 
 % Replicates parameter for kmeans function
-kmeansReplicates = 1; %1000;
+kmeansReplicates = 1000;
 
 
 if nargin == 0
